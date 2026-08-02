@@ -882,3 +882,6 @@ textarea:focus {
     width: 100%;
   }
 }
+.connection {
+  display: none !important;
+}
