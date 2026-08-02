@@ -10,11 +10,21 @@ const hasConfig =
   !config.SUPABASE_PUBLISHABLE_KEY.includes("JOUW-PUBLISHABLE");
 
 const elements = {
+  landingPanel: document.querySelector("#landingPanel"),
   setupPanel: document.querySelector("#setupPanel"),
+  boardListPanel: document.querySelector("#boardListPanel"),
   boardPanel: document.querySelector("#boardPanel"),
   messagePanel: document.querySelector("#messagePanel"),
   messageTitle: document.querySelector("#messageTitle"),
   messageText: document.querySelector("#messageText"),
+  newBoardChoice: document.querySelector("#newBoardChoice"),
+  existingBoardChoice: document.querySelector("#existingBoardChoice"),
+  backFromCreate: document.querySelector("#backFromCreate"),
+  backFromList: document.querySelector("#backFromList"),
+  boardSearch: document.querySelector("#boardSearch"),
+  refreshBoards: document.querySelector("#refreshBoards"),
+  boardList: document.querySelector("#boardList"),
+  listError: document.querySelector("#listError"),
   createForm: document.querySelector("#createForm"),
   createButton: document.querySelector("#createButton"),
   boardTitle: document.querySelector("#boardTitle"),
@@ -37,6 +47,7 @@ let supabase = null;
 let boardId = null;
 let boardToken = null;
 let squares = [];
+let availableBoards = [];
 let boardChannel = null;
 let toastTimer = null;
 let hadBingo = false;
@@ -58,9 +69,18 @@ const BINGO_LINES = [
 ];
 
 function setView(view) {
+  elements.landingPanel.hidden = view !== "landing";
   elements.setupPanel.hidden = view !== "setup";
+  elements.boardListPanel.hidden = view !== "list";
   elements.boardPanel.hidden = view !== "board";
   elements.messagePanel.hidden = view !== "message";
+}
+
+function showLanding() {
+  setView("landing");
+  elements.setupError.textContent = "";
+  elements.listError.textContent = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function setConnection(status, label) {
@@ -92,7 +112,7 @@ function getItemsFromTextarea() {
 function updateItemCount() {
   const count = getItemsFromTextarea().length;
   elements.itemCount.textContent = `${count} van 24`;
-  elements.itemCount.style.color = count === 24 ? "#14532d" : "";
+  elements.itemCount.classList.toggle("complete", count === 24);
 }
 
 function getTokenFromHash() {
@@ -100,10 +120,6 @@ function getTokenFromHash() {
     ? window.location.hash.slice(1)
     : window.location.hash;
   return new URLSearchParams(rawHash).get("token")?.trim() || null;
-}
-
-function isAdminPage() {
-  return new URLSearchParams(window.location.search).has("admin");
 }
 
 function setShareUrl(token) {
@@ -168,6 +184,97 @@ async function createBoard(event) {
   } finally {
     elements.createButton.disabled = false;
     elements.createButton.textContent = "Kaart maken";
+  }
+}
+
+async function loadBoards() {
+  setView("list");
+  elements.listError.textContent = "";
+  elements.boardList.innerHTML = '<div class="list-state">Kaarten laden...</div>';
+  elements.refreshBoards.disabled = true;
+
+  try {
+    await ensureAnonymousSession();
+    const { data, error } = await supabase.rpc("list_bingo_boards");
+    if (error) throw error;
+    availableBoards = Array.isArray(data) ? data : [];
+    renderBoardList();
+  } catch (error) {
+    console.error(error);
+    availableBoards = [];
+    elements.boardList.replaceChildren();
+    elements.listError.textContent = readableError(error);
+  } finally {
+    elements.refreshBoards.disabled = false;
+  }
+}
+
+function renderBoardList() {
+  const query = elements.boardSearch.value.trim().toLocaleLowerCase("nl-NL");
+  const filteredBoards = availableBoards.filter((board) =>
+    String(board.title || "").toLocaleLowerCase("nl-NL").includes(query)
+  );
+
+  if (filteredBoards.length === 0) {
+    const state = document.createElement("div");
+    state.className = "list-state";
+    state.innerHTML = query
+      ? "Geen kaart gevonden met deze titel."
+      : "Er zijn nog geen bingokaarten. Maak de eerste kaart.";
+    elements.boardList.replaceChildren(state);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  for (const board of filteredBoards) {
+    const row = document.createElement("article");
+    row.className = "board-list-item";
+
+    const copy = document.createElement("div");
+    copy.className = "board-list-copy";
+
+    const title = document.createElement("h2");
+    title.textContent = board.title;
+
+    const date = document.createElement("p");
+    date.textContent = formatBoardDate(board.created_at);
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "button secondary compact";
+    openButton.textContent = "Open kaart";
+    openButton.addEventListener("click", () => openListedBoard(board.share_token, openButton));
+
+    copy.append(title, date);
+    row.append(copy, openButton);
+    fragment.appendChild(row);
+  }
+
+  elements.boardList.replaceChildren(fragment);
+}
+
+function formatBoardDate(value) {
+  if (!value) return "Bestaande kaart";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Bestaande kaart";
+  return `Aangemaakt op ${new Intl.DateTimeFormat("nl-NL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(date)}`;
+}
+
+async function openListedBoard(token, button) {
+  button.disabled = true;
+  elements.listError.textContent = "";
+
+  try {
+    setShareUrl(token);
+    await openBoard(token);
+  } catch (error) {
+    console.error(error);
+    elements.listError.textContent = readableError(error);
+    button.disabled = false;
   }
 }
 
@@ -364,6 +471,9 @@ function readableError(error) {
   if (message.includes("Kaart niet gevonden") || message.includes("Board not found")) {
     return "Deze bingokaart bestaat niet of de link is onjuist.";
   }
+  if (message.includes("list_bingo_boards") || message.includes("function") && message.includes("does not exist")) {
+    return "Voer de nieuwste supabase.sql uit. Daarna kunnen bestaande kaarten worden geladen.";
+  }
   if (message.includes("Invalid API key") || message.includes("apikey")) {
     return "De Supabase sleutel in config.js klopt niet.";
   }
@@ -380,6 +490,12 @@ async function init() {
   elements.createForm.addEventListener("submit", createBoard);
   elements.copyButton.addEventListener("click", copyShareLink);
   elements.resetButton.addEventListener("click", resetBoard);
+  elements.newBoardChoice.addEventListener("click", () => setView("setup"));
+  elements.existingBoardChoice.addEventListener("click", loadBoards);
+  elements.backFromCreate.addEventListener("click", showLanding);
+  elements.backFromList.addEventListener("click", showLanding);
+  elements.refreshBoards.addEventListener("click", loadBoards);
+  elements.boardSearch.addEventListener("input", renderBoardList);
 
   window.addEventListener("online", () => setConnection(null, "Opnieuw verbinden"));
   window.addEventListener("offline", () => setConnection("offline", "Geen internet"));
@@ -410,18 +526,12 @@ async function init() {
     return;
   }
 
-  if (!isAdminPage()) {
-    showMessage("Open een bingokaart", "Gebruik de volledige gedeelde link die je van de beheerder hebt gekregen.");
-    setConnection(null, "Klaar");
-    return;
-  }
-
-  setView("setup");
+  setView("landing");
   try {
     await ensureAnonymousSession();
     setConnection("online", "Klaar");
   } catch (error) {
-    elements.setupError.textContent = readableError(error);
+    showMessage("Geen verbinding", readableError(error));
     setConnection("offline", "Niet verbonden");
   }
 }

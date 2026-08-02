@@ -1,57 +1,46 @@
-https://nielse02.github.io/madeleinebingo/
+# JustMadeleine Bingo
 
-# Samen Bingo
+Een gedeelde live bingokaart voor GitHub Pages met Supabase.
 
-Een statische GitHub Pages website met Supabase voor één gedeelde, live bingokaart.
+## Nieuwe startpagina
+
+Iedere bezoeker komt zonder kaartlink eerst op een keuzescherm.
+
+Daar kan iemand:
+
+- een nieuwe bingokaart maken;
+- een bestaande bingokaart uit de openbare lijst openen.
+
+Een gedeelde kaartlink opent nog steeds direct de juiste kaart. Op de kaartpagina staat geen knop terug naar het aanmaakscherm.
+
+## Belangrijk over bestaande kaarten
+
+De lijst toont maximaal 100 kaarten, nieuwste eerst. Iedereen die de website opent kan de titel zien en de kaart openen.
+
+Gebruik daarom geen privégegevens in de titel of vakken.
 
 ## Wat werkt
 
-- De beheerder vult 24 bingovakken in.
+- Iedereen kan een kaart maken met 24 eigen vakken.
 - Het middenvak is altijd `Scheel kijken` en blijft afgevinkt.
-- Iedereen met de gedeelde link werkt live op dezelfde kaart.
-- Vinkjes synchroniseren via Supabase Realtime.
-- De kaartpagina bevat geen link terug naar de beheerpagina.
-- Iedere deelnemer kan met de knop `Nieuwe ronde` alle vinkjes wissen voor iedereen.
+- Iedereen op dezelfde kaart ziet live dezelfde vinkjes.
+- Iedere deelnemer kan losse vinkjes aan en uit zetten.
+- Iedere deelnemer kan met `Nieuwe ronde` alle vinkjes wissen.
 - De site herkent horizontale, verticale en diagonale bingo.
+- Het losse B-icoon is verwijderd. De branding bestaat uit het tekstlogo `JustMadeleine Bingo`.
 
-## Beheerpagina openen
+## Update installeren
 
-De gewone website-URL opent geen setup meer.
+1. Upload `index.html`, `app.js` en `styles.css` opnieuw naar de hoofdmap van je GitHub repository.
+2. Vervang de bestaande bestanden.
+3. Laat je bestaande `config.js` staan.
+4. Open de SQL Editor in Supabase.
+5. Plak de volledige inhoud van `supabase.sql`.
+6. Klik op `Run`.
 
-Open de beheerpagina met `?admin=1` achter je GitHub Pages URL.
+De SQL-update voegt de functie `list_bingo_boards` toe. Zonder deze update kan het keuzescherm bestaande kaarten niet laden.
 
-Voorbeeld:
-
-```text
-https://jouwnaam.github.io/samen-bingo/?admin=1
-```
-
-Bewaar deze URL als bladwijzer. Na het maken van een kaart verdwijnt `?admin=1` automatisch uit de gedeelde link.
-
-Dit is geen login of wachtwoordbeveiliging. De beheerpagina is alleen niet zichtbaar vanuit de kaart. Iedereen die de beheer-URL kent, kan een kaart maken.
-
-## Supabase bijwerken
-
-1. Open je Supabase project.
-2. Open `SQL Editor`.
-3. Plak de volledige inhoud van `supabase.sql`.
-4. Klik op `Run`.
-
-Je bestaande tabellen en kaarten blijven staan. De databasefuncties worden bijgewerkt.
-
-Nieuwe kaarten krijgen daarna altijd `Scheel kijken` in het midden. Bestaande kaarten veranderen niet automatisch.
-
-## Website bijwerken
-
-Upload deze gewijzigde bestanden opnieuw naar de hoofdmap van je GitHub repository:
-
-- `index.html`
-- `app.js`
-- `styles.css`
-- `supabase.sql`
-- `README.md`
-
-Laat je bestaande `config.js` staan. Daar staan jouw Supabase gegevens in.
+Bestaande kaarten en vinkjes blijven bewaard.
 
 ## Eerste installatie
 
@@ -63,9 +52,3 @@ Laat je bestaande `config.js` staan. Daar staan jouw Supabase gegevens in.
 6. Activeer GitHub Pages via branch `main` en map `/(root)`.
 
 Gebruik nooit je service_role key in deze website.
-
-## Nieuwe ronde starten
-
-Iedereen die de gedeelde kaart kan openen, ziet de knop `Nieuwe ronde`. Na bevestiging worden alle vinkjes voor alle deelnemers gewist. Het vaste middenvak `Scheel kijken` blijft afgevinkt.
-
-Gebruik de knop alleen wanneer de groep klaar is voor een nieuwe ronde. De wijziging wordt direct live gesynchroniseerd.

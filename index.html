@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fff7ed">
-  <meta name="description" content="Ik zou haar wel neuken - Quinten over JustMadeleine">
-  <title>Madeleine Bingo</title>
+  <meta name="theme-color" content="#4a2033">
+  <meta name="description" content="Maak of open een gedeelde JustMadeleine bingokaart.">
+  <title>JustMadeleine Bingo</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="shell">
     <header class="site-header">
-      <div class="brand" aria-label="Madeleine Bingo">
-        <span class="brand-mark" aria-hidden="true">B</span>
-        <span>Madeleine Bingo</span>
+      <div class="brand" aria-label="JustMadeleine Bingo">
+        <span class="brand-main">JustMadeleine</span>
+        <span class="brand-sub">Bingo</span>
       </div>
       <div id="connectionStatus" class="connection" aria-live="polite">
         <span class="connection-dot"></span>
@@ -21,14 +21,39 @@
       </div>
     </header>
 
+    <section id="landingPanel" class="panel landing-panel" hidden>
+      <div class="panel-decoration" aria-hidden="true">✦</div>
+      <p class="eyebrow">JustMadeleine Bingo</p>
+      <h1>Wat wil je doen?</h1>
+      <p class="intro">Maak een nieuwe kaart of speel verder met een kaart die al bestaat.</p>
+
+      <div class="choice-grid">
+        <button id="newBoardChoice" class="choice-card" type="button">
+          <span class="choice-number">01</span>
+          <strong>Nieuwe bingokaart aanmaken</strong>
+          <span>Vul 24 vakken in. Scheel kijken staat vast in het midden.</span>
+          <span class="choice-action">Nieuwe kaart maken</span>
+        </button>
+
+        <button id="existingBoardChoice" class="choice-card" type="button">
+          <span class="choice-number">02</span>
+          <strong>Bestaande bingokaart kiezen</strong>
+          <span>Bekijk de kaarten die al zijn aangemaakt en open er één.</span>
+          <span class="choice-action">Kaarten bekijken</span>
+        </button>
+      </div>
+    </section>
+
     <section id="setupPanel" class="panel setup-panel" hidden>
-      <p class="eyebrow">Beheer</p>
-      <h1>Maak een nieuwe bingokaart</h1>
+      <button id="backFromCreate" class="back-button" type="button">Terug naar kiezen</button>
+      <div class="panel-decoration" aria-hidden="true">✦</div>
+      <p class="eyebrow">Nieuwe kaart</p>
+      <h1>Maak een bingokaart</h1>
       <p class="intro">Vul 24 vakken in. Het middenvak staat altijd vast op Scheel kijken.</p>
 
       <form id="createForm" class="create-form">
         <label for="boardTitle">Titel</label>
-        <input id="boardTitle" name="title" type="text" maxlength="80" value="Onze bingokaart" required>
+        <input id="boardTitle" name="title" type="text" maxlength="80" value="Madeleine Bingo" required>
 
         <div class="label-row">
           <label for="items">Bingovakken</label>
@@ -48,10 +73,29 @@
       </form>
     </section>
 
+    <section id="boardListPanel" class="panel board-list-panel" hidden>
+      <button id="backFromList" class="back-button" type="button">Terug naar kiezen</button>
+      <div class="panel-decoration" aria-hidden="true">✦</div>
+      <p class="eyebrow">Bestaande kaarten</p>
+      <h1>Kies een bingokaart</h1>
+      <p class="intro">Open een kaart en werk live samen met iedereen die dezelfde kaart gebruikt.</p>
+
+      <div class="list-toolbar">
+        <label class="search-field" for="boardSearch">
+          <span>Zoeken</span>
+          <input id="boardSearch" type="search" placeholder="Zoek op titel">
+        </label>
+        <button id="refreshBoards" class="button ghost compact" type="button">Vernieuwen</button>
+      </div>
+
+      <div id="boardList" class="board-list" aria-live="polite"></div>
+      <p id="listError" class="error" role="alert"></p>
+    </section>
+
     <section id="boardPanel" class="board-panel" hidden>
       <div class="board-topbar">
         <div>
-          <p class="eyebrow">Gedeelde kaart</p>
+          <p class="eyebrow">JustMadeleine Bingo</p>
           <h1 id="boardTitleDisplay">Bingokaart</h1>
         </div>
         <div class="actions">
@@ -75,8 +119,10 @@
     </section>
 
     <section id="messagePanel" class="panel message-panel" hidden>
+      <div class="panel-decoration" aria-hidden="true">✦</div>
+      <p class="eyebrow">JustMadeleine Bingo</p>
       <h1 id="messageTitle">Open een bingokaart</h1>
-      <p id="messageText">Gebruik de volledige gedeelde link van de beheerder.</p>
+      <p id="messageText">Gebruik de volledige gedeelde link.</p>
     </section>
   </main>
 
