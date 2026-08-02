@@ -2,64 +2,70 @@ https://nielse02.github.io/madeleinebingo/
 
 # Samen Bingo
 
-Een statische GitHub Pages website met Supabase voor gedeelde, live bingokaarten.
+Een statische GitHub Pages website met Supabase voor één gedeelde, live bingokaart.
 
 ## Wat werkt
 
-- Maak een kaart met 24 of 25 vakken.
-- Bij 24 vakken wordt het midden een vrij vak.
-- Deel één geheime link.
-- Iedereen met die link werkt live op dezelfde kaart.
+- De beheerder vult 24 bingovakken in.
+- Het middenvak is altijd `Scheel kijken` en blijft afgevinkt.
+- Iedereen met de gedeelde link werkt live op dezelfde kaart.
 - Vinkjes synchroniseren via Supabase Realtime.
-- RLS schermt kaarten af voor bezoekers zonder de link.
+- De kaartpagina bevat geen link terug naar de beheerpagina.
+- Iedere deelnemer kan met de knop `Nieuwe ronde` alle vinkjes wissen voor iedereen.
 - De site herkent horizontale, verticale en diagonale bingo.
 
-## 1. Supabase instellen
+## Beheerpagina openen
 
-1. Maak een nieuw Supabase project.
+De gewone website-URL opent geen setup meer.
+
+Open de beheerpagina met `?admin=1` achter je GitHub Pages URL.
+
+Voorbeeld:
+
+```text
+https://jouwnaam.github.io/samen-bingo/?admin=1
+```
+
+Bewaar deze URL als bladwijzer. Na het maken van een kaart verdwijnt `?admin=1` automatisch uit de gedeelde link.
+
+Dit is geen login of wachtwoordbeveiliging. De beheerpagina is alleen niet zichtbaar vanuit de kaart. Iedereen die de beheer-URL kent, kan een kaart maken.
+
+## Supabase bijwerken
+
+1. Open je Supabase project.
 2. Open `SQL Editor`.
-3. Plak de volledige inhoud van `supabase.sql` en voer die uit.
-4. Ga naar `Authentication`, daarna `Sign In / Providers`.
-5. Zet `Allow anonymous sign-ins` aan.
-6. Ga naar `Project Settings`, daarna `API`.
-7. Kopieer je Project URL en Publishable key. Een oudere anon key werkt ook.
-8. Vul beide waarden in `config.js` in.
+3. Plak de volledige inhoud van `supabase.sql`.
+4. Klik op `Run`.
+
+Je bestaande tabellen en kaarten blijven staan. De databasefuncties worden bijgewerkt.
+
+Nieuwe kaarten krijgen daarna altijd `Scheel kijken` in het midden. Bestaande kaarten veranderen niet automatisch.
+
+## Website bijwerken
+
+Upload deze gewijzigde bestanden opnieuw naar de hoofdmap van je GitHub repository:
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `supabase.sql`
+- `README.md`
+
+Laat je bestaande `config.js` staan. Daar staan jouw Supabase gegevens in.
+
+## Eerste installatie
+
+1. Maak een Supabase project.
+2. Voer `supabase.sql` uit in de SQL Editor.
+3. Zet Anonymous Sign-Ins aan via Authentication.
+4. Vul je Project URL en Publishable key in `config.js` in.
+5. Upload alle bestanden naar de hoofdmap van een GitHub repository.
+6. Activeer GitHub Pages via branch `main` en map `/(root)`.
 
 Gebruik nooit je service_role key in deze website.
 
-## 2. Lokaal testen
+## Nieuwe ronde starten
 
-Open de map via een lokale webserver. Een directe `file://` URL werkt niet altijd met JavaScript modules.
+Iedereen die de gedeelde kaart kan openen, ziet de knop `Nieuwe ronde`. Na bevestiging worden alle vinkjes voor alle deelnemers gewist. Het vaste middenvak `Scheel kijken` blijft afgevinkt.
 
-Met Python:
-
-```bash
-python3 -m http.server 8080
-```
-
-Open daarna `http://localhost:8080`.
-
-## 3. Op GitHub Pages zetten
-
-1. Maak een GitHub repository.
-2. Upload alle bestanden uit deze map naar de hoofdmap van de repository.
-3. Open `Settings`, daarna `Pages`.
-4. Kies bij `Source` voor `Deploy from a branch`.
-5. Kies branch `main` en map `/(root)`.
-6. Sla op en open de gepubliceerde URL.
-
-## Beveiliging
-
-De link bevat een willekeurige geheime token in het URL-fragment na `#`. Dit fragment wordt niet als onderdeel van het normale HTTP-verzoek naar GitHub Pages gestuurd.
-
-Elke bezoeker logt automatisch in als anonieme Supabase gebruiker. De functie `join_bingo_board` koppelt die gebruiker aan de kaart. De RLS regels geven alleen toegang tot gekoppelde kaarten.
-
-Voor een druk bezochte publieke site is het slim om CAPTCHA en passende Auth rate limits in Supabase in te stellen om misbruik van anonieme registraties te beperken.
-
-## Bestanden
-
-- `index.html`, pagina-opbouw.
-- `styles.css`, ontwerp en mobiele weergave.
-- `app.js`, kaartlogica en live synchronisatie.
-- `config.js`, jouw publieke Supabase instellingen.
-- `supabase.sql`, tabellen, functies, RLS en Realtime.
+Gebruik de knop alleen wanneer de groep klaar is voor een nieuwe ronde. De wijziging wordt direct live gesynchroniseerd.
