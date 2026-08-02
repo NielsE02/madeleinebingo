@@ -1,3 +1,5 @@
+https://nielse02.github.io/madeleinebingo/
+
 # JustMadeleine Bingo
 
 Een gedeelde live bingokaart voor GitHub Pages met Supabase.
