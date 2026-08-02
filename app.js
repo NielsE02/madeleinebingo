@@ -12,6 +12,7 @@ const hasConfig =
   !config.SUPABASE_PUBLISHABLE_KEY.includes("JOUW-PUBLISHABLE");
 
 const elements = {
+  homeLink: document.querySelector("#homeLink"),
   landingPanel: document.querySelector("#landingPanel"),
   setupPanel: document.querySelector("#setupPanel"),
   boardListPanel: document.querySelector("#boardListPanel"),
@@ -83,6 +84,26 @@ function showLanding() {
   elements.setupError.textContent = "";
   elements.listError.textContent = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function goHome(event) {
+  event?.preventDefault();
+
+  if (boardChannel && supabase) {
+    await supabase.removeChannel(boardChannel);
+    boardChannel = null;
+  }
+
+  boardId = null;
+  boardToken = null;
+  squares = [];
+  hadBingo = false;
+  elements.bingoGrid.replaceChildren();
+  elements.boardError.textContent = "";
+
+  window.history.pushState({}, "", HOME_URL);
+  showLanding();
+  setConnection(navigator.onLine ? "online" : "offline", navigator.onLine ? "Klaar" : "Geen internet");
 }
 
 function setConnection(status, label) {
@@ -487,6 +508,7 @@ function readableError(error) {
 
 async function init() {
   updateItemCount();
+  elements.homeLink.addEventListener("click", goHome);
   elements.items.addEventListener("input", updateItemCount);
   elements.createForm.addEventListener("submit", createBoard);
   elements.copyButton.addEventListener("click", copyShareLink);
