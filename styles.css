@@ -885,3 +885,52 @@ textarea:focus {
 .connection {
   display: none !important;
 }
+
+.square {
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0.78)
+    ),
+    url("images/bingo-normaal.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.square:nth-child(odd):not(.checked):not(.free) {
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0.78)
+    ),
+    url("images/bingo-normaal.jpg");
+}
+
+.square.checked {
+  background-image:
+    linear-gradient(
+      rgba(74, 32, 51, 0.55),
+      rgba(74, 32, 51, 0.55)
+    ),
+    url("images/bingo-afgevinkt.jpg");
+
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
+.square.free,
+.square.free.checked {
+  background-image:
+    linear-gradient(
+      rgba(255, 248, 233, 0.72),
+      rgba(255, 248, 233, 0.72)
+    ),
+    url("images/bingo-afgevinkt.jpg");
+
+  background-size: cover;
+  background-position: center;
+  color: #8f5f24;
+}
