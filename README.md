@@ -1,8 +1,14 @@
-https://nielse02.github.io/madeleinebingo/
-
 # JustMadeleine Bingo
 
 Een gedeelde live bingokaart voor GitHub Pages met Supabase.
+
+## Vaste startpagina
+
+De startpagina is vast ingesteld op `https://nielse02.github.io/madeleinebingo/`.
+
+- Klik op `JustMadeleine Bingo` linksboven om altijd terug te gaan naar de startpagina.
+- Nieuwe deellinks worden altijd vanaf deze vaste URL opgebouwd.
+- Een deellink houdt de kaartcode achter `#token=`.
 
 ## Nieuwe startpagina
 

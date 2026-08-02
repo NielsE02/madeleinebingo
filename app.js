@@ -1,5 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
+const HOME_URL = "https://nielse02.github.io/madeleinebingo/";
+
 const config = window.BINGO_CONFIG ?? {};
 const hasConfig =
   typeof config.SUPABASE_URL === "string" &&
@@ -123,8 +125,7 @@ function getTokenFromHash() {
 }
 
 function setShareUrl(token) {
-  const url = new URL(window.location.href);
-  url.search = "";
+  const url = new URL(HOME_URL);
   url.hash = new URLSearchParams({ token }).toString();
   window.history.replaceState({}, "", url);
 }

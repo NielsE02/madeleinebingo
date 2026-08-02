@@ -97,6 +97,12 @@ a {
   text-decoration: none;
 }
 
+.brand:hover .brand-main,
+.brand:focus-visible .brand-main {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .brand-main {
   font-size: clamp(1.12rem, 2vw, 1.35rem);
   font-weight: 900;
