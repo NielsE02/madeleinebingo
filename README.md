@@ -1,3 +1,5 @@
+https://nielse02.github.io/madeleinebingo/
+
 # Samen Bingo
 
 Een statische GitHub Pages website met Supabase voor gedeelde, live bingokaarten.
