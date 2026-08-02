@@ -13,6 +13,7 @@ const elements = {
   setupPanel: document.querySelector("#setupPanel"),
   boardPanel: document.querySelector("#boardPanel"),
   messagePanel: document.querySelector("#messagePanel"),
+  messageTitle: document.querySelector("#messageTitle"),
   messageText: document.querySelector("#messageText"),
   createForm: document.querySelector("#createForm"),
   createButton: document.querySelector("#createButton"),
@@ -39,6 +40,7 @@ let squares = [];
 let boardChannel = null;
 let toastTimer = null;
 let hadBingo = false;
+let currentUserId = null;
 
 const BINGO_LINES = [
   [0, 1, 2, 3, 4],
@@ -67,7 +69,8 @@ function setConnection(status, label) {
   elements.connectionStatus.querySelector("span:last-child").textContent = label;
 }
 
-function showMessage(text) {
+function showMessage(title, text) {
+  elements.messageTitle.textContent = title;
   elements.messageText.textContent = text;
   setView("message");
 }
@@ -88,8 +91,8 @@ function getItemsFromTextarea() {
 
 function updateItemCount() {
   const count = getItemsFromTextarea().length;
-  elements.itemCount.textContent = `${count} van 24 of 25`;
-  elements.itemCount.style.color = count === 24 || count === 25 ? "#14532d" : "";
+  elements.itemCount.textContent = `${count} van 24`;
+  elements.itemCount.style.color = count === 24 ? "#14532d" : "";
 }
 
 function getTokenFromHash() {
@@ -99,8 +102,13 @@ function getTokenFromHash() {
   return new URLSearchParams(rawHash).get("token")?.trim() || null;
 }
 
+function isAdminPage() {
+  return new URLSearchParams(window.location.search).has("admin");
+}
+
 function setShareUrl(token) {
   const url = new URL(window.location.href);
+  url.search = "";
   url.hash = new URLSearchParams({ token }).toString();
   window.history.replaceState({}, "", url);
 }
@@ -108,10 +116,14 @@ function setShareUrl(token) {
 async function ensureAnonymousSession() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError) throw sessionError;
-  if (sessionData.session) return sessionData.session;
+  if (sessionData.session) {
+    currentUserId = sessionData.session.user.id;
+    return sessionData.session;
+  }
 
   const { data, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
+  currentUserId = data.session?.user?.id ?? null;
   return data.session;
 }
 
@@ -127,8 +139,8 @@ async function createBoard(event) {
     return;
   }
 
-  if (items.length !== 24 && items.length !== 25) {
-    elements.setupError.textContent = "Vul precies 24 of 25 niet-lege regels in.";
+  if (items.length !== 24) {
+    elements.setupError.textContent = "Vul precies 24 niet-lege regels in.";
     return;
   }
 
@@ -161,7 +173,8 @@ async function createBoard(event) {
 
 async function openBoard(token) {
   setConnection(null, "Verbinden");
-  await ensureAnonymousSession();
+  const session = await ensureAnonymousSession();
+  currentUserId = session?.user?.id ?? currentUserId;
 
   const { data: joinedBoardId, error: joinError } = await supabase.rpc("join_bingo_board", {
     p_share_token: token
@@ -189,6 +202,7 @@ async function openBoard(token) {
   }
 
   elements.boardTitleDisplay.textContent = board.title;
+  elements.resetButton.hidden = false;
   squares = boardSquares;
   renderBoard();
   setView("board");
@@ -232,7 +246,7 @@ async function toggleSquare(squareId) {
   const square = squares.find((item) => String(item.id) === String(squareId));
   if (!square) return;
   if (square.is_free) {
-    showToast("Het vrije vak blijft afgevinkt.");
+    showToast("Scheel kijken blijft afgevinkt.");
     return;
   }
 
@@ -316,7 +330,7 @@ async function copyShareLink() {
 }
 
 async function resetBoard() {
-  const accepted = window.confirm("Alle vinkjes op deze gedeelde kaart wissen?");
+  const accepted = window.confirm("Nieuwe ronde starten? Dit wist alle vinkjes voor iedereen. Scheel kijken blijft afgevinkt.");
   if (!accepted) return;
 
   elements.resetButton.disabled = true;
@@ -330,7 +344,7 @@ async function resetBoard() {
       updateSquareInDom(square);
     });
     updateProgress();
-    showToast("Alle vinkjes zijn gewist.");
+    showToast("Nieuwe ronde gestart.");
   } catch (error) {
     elements.boardError.textContent = readableError(error);
   } finally {
@@ -353,6 +367,9 @@ function readableError(error) {
   if (message.includes("Invalid API key") || message.includes("apikey")) {
     return "De Supabase sleutel in config.js klopt niet.";
   }
+  if (message.includes("Not a board member")) {
+    return "Je hebt geen toegang tot deze bingokaart.";
+  }
 
   return message;
 }
@@ -368,7 +385,7 @@ async function init() {
   window.addEventListener("offline", () => setConnection("offline", "Geen internet"));
 
   if (!hasConfig) {
-    showMessage("Vul eerst je Supabase URL en publishable key in config.js in.");
+    showMessage("Website niet ingesteld", "Vul eerst je Supabase URL en publishable key in config.js in.");
     setConnection("offline", "Niet ingesteld");
     return;
   }
@@ -382,23 +399,29 @@ async function init() {
   });
 
   const token = getTokenFromHash();
-  if (!token) {
-    setView("setup");
+  if (token) {
     try {
-      await ensureAnonymousSession();
-      setConnection("online", "Klaar");
+      await openBoard(token);
     } catch (error) {
-      elements.setupError.textContent = readableError(error);
+      console.error(error);
+      showMessage("Deze kaart kan niet worden geopend", readableError(error));
       setConnection("offline", "Niet verbonden");
     }
     return;
   }
 
+  if (!isAdminPage()) {
+    showMessage("Open een bingokaart", "Gebruik de volledige gedeelde link die je van de beheerder hebt gekregen.");
+    setConnection(null, "Klaar");
+    return;
+  }
+
+  setView("setup");
   try {
-    await openBoard(token);
+    await ensureAnonymousSession();
+    setConnection("online", "Klaar");
   } catch (error) {
-    console.error(error);
-    showMessage(readableError(error));
+    elements.setupError.textContent = readableError(error);
     setConnection("offline", "Niet verbonden");
   }
 }

@@ -11,10 +11,10 @@
 <body>
   <main class="shell">
     <header class="site-header">
-      <a class="brand" href="./" aria-label="Nieuwe bingokaart maken">
+      <div class="brand" aria-label="Samen Bingo">
         <span class="brand-mark" aria-hidden="true">B</span>
         <span>Samen Bingo</span>
-      </a>
+      </div>
       <div id="connectionStatus" class="connection" aria-live="polite">
         <span class="connection-dot"></span>
         <span>Verbinden</span>
@@ -22,9 +22,9 @@
     </header>
 
     <section id="setupPanel" class="panel setup-panel" hidden>
-      <p class="eyebrow">Nieuwe kaart</p>
-      <h1>Maak een bingokaart en deel de link</h1>
-      <p class="intro">Iedereen met de link ziet dezelfde kaart en dezelfde afgevinkte vakjes.</p>
+      <p class="eyebrow">Beheer</p>
+      <h1>Maak een nieuwe bingokaart</h1>
+      <p class="intro">Vul 24 vakken in. Het middenvak staat altijd vast op Scheel kijken.</p>
 
       <form id="createForm" class="create-form">
         <label for="boardTitle">Titel</label>
@@ -32,10 +32,16 @@
 
         <div class="label-row">
           <label for="items">Bingovakken</label>
-          <span id="itemCount">0 van 24 of 25</span>
+          <span id="itemCount">0 van 24</span>
         </div>
-        <textarea id="items" name="items" rows="14" required placeholder="Eén vak per regel&#10;Iemand zegt: goed punt&#10;Koffie wordt gemorst&#10;..."></textarea>
-        <p class="hint">Gebruik 24 regels voor een gratis middenvak, of 25 regels voor een volledig eigen kaart.</p>
+        <textarea id="items" name="items" rows="12" required placeholder="Eén vak per regel&#10;Iemand zegt: goed punt&#10;Koffie wordt gemorst&#10;..."></textarea>
+
+        <div class="fixed-square-preview" aria-label="Vast middenvak">
+          <span>Vast middenvak</span>
+          <strong>Scheel kijken</strong>
+        </div>
+
+        <p class="hint">Vul precies 24 niet-lege regels in. Scheel kijken komt automatisch op plek 13.</p>
 
         <button id="createButton" class="button primary" type="submit">Kaart maken</button>
         <p id="setupError" class="error" role="alert"></p>
@@ -50,7 +56,7 @@
         </div>
         <div class="actions">
           <button id="copyButton" class="button secondary" type="button">Deel link</button>
-          <button id="resetButton" class="button ghost" type="button">Wis vinkjes</button>
+          <button id="resetButton" class="button ghost" type="button" hidden>Nieuwe ronde</button>
         </div>
       </div>
 
@@ -69,9 +75,8 @@
     </section>
 
     <section id="messagePanel" class="panel message-panel" hidden>
-      <h1>Deze kaart kan niet worden geopend</h1>
-      <p id="messageText">Controleer de link of maak een nieuwe kaart.</p>
-      <a class="button primary button-link" href="./">Nieuwe kaart maken</a>
+      <h1 id="messageTitle">Open een bingokaart</h1>
+      <p id="messageText">Gebruik de volledige gedeelde link van de beheerder.</p>
     </section>
   </main>
 
